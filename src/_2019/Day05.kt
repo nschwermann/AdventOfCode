@@ -1,85 +1,150 @@
 package _2019
 
 import ResourceReader
+import java.lang.IllegalStateException
 
 fun main() {
     val input = ResourceReader(2019, 5).intArray()
 
-    sequence(input).fold(1 as Int?){code , instruction ->
-        instruction.execute(input, code)
-    }.let { println(it) }
-
+    println("Part1 : ${sequence(input.copyOf(), 1).last().value}")
+    println("Part2 : ${sequence(input.copyOf(), 5).last().value}")
 }
 
-fun sequence(array : IntArray) = sequence {
-    val iterator = array.iterator()
-    while(true){
-        iterator.nextInt().run {
-            toString().padStart(5, '0').let {
-                Program.forOpCode(it.takeLast(2).toInt()) to
-                        it.take(3).reversed().map(Character::getNumericValue).iterator()
-            }
-        }.let {(program, modes) ->
-            if(program is Program.Term) return@sequence
+fun sequence(array: IntArray, input : Int) = generateSequence(PV(Pointer(0), Value.Something(input))){ output ->
+    array.execute(output)
+}
 
-            val args = Array(program.params){
-                Argument(Mode.values()[modes.next()], iterator.nextInt())
-            }
-            yield(Instructions(program, args))
+fun OpAndModes.getArguments(memory: IntArray, pointer: Pointer) = (0 until op.params).map{ index->
+    Argument(memory[pointer.value + 1 + index], modes[index])
+}
+
+fun IntArray.getOperation(pointer: Pointer) : OpAndModes = get(pointer.value).toOpMode()
+
+
+data class OpAndModes(val op : Operation, val modes : List<Argument.Mode>)
+fun Int.toOpMode() : OpAndModes{
+    return toString().padStart(5, '0').let { word ->
+        OpAndModes(
+            Operation.forOpCode(word.takeLast(2).toInt()),
+            word.take(3).reversed().map(Character::getNumericValue).map { Argument.Mode.values()[it] }
+        )
+    }
+}
+
+inline class Pointer(val value : Int)
+operator fun Pointer.plus(op : Operation) : Pointer{
+    return Pointer(value + 1 + op.params)
+}
+operator fun Pointer.plus(value : Int) : Int {
+    return this.value + value 
+}
+
+sealed class Value{
+    data class Something(val value: Int) : Value()
+    object None : Value()
+    fun eval() : Int {
+        return when(this) {
+            is Something -> value
+            else -> throw IllegalStateException("Value was None")
         }
     }
 }
 
-enum class Mode{
-    Position,
-    Immediate
-}
+data class PV(val pointer : Pointer, val value : Value)
 
-data class Argument(val mode : Mode, val value : Int){
-    fun eval(mem : IntArray) : Int {
+data class Argument (private val value : Int, private val mode : Mode){
+
+    enum class Mode{
+        Position,
+        Immediate
+    }
+
+    fun write(memory: IntArray, write: Int){
+        memory[value] = write
+    }
+
+    fun eval(memory: IntArray) : Int {
         return when(mode) {
-            Mode.Position -> mem[value]
+            Mode.Position -> memory[value]
             Mode.Immediate -> value
         }
     }
 }
 
-sealed class Program(private val opCode : Int, val params: Int){
-    object Term : Program(99, 0)
-    object Add : Program(1, 3)
-    object Mul : Program(2, 3)
-    object Store : Program(3, 1)
-    object Out : Program(4, 1)
+sealed class Operation(private val code : Int, val params: Int){
+    object Term : Operation(99, 0)
+    object Add : Operation(1, 3)
+    object Mul : Operation(2, 3)
+    object Store : Operation(3, 1)
+    object Out : Operation(4, 1)
+    object JIT : Operation(5, 2)
+    object JIF : Operation(6, 2)
+    object LessThan : Operation(7, 3)
+    object Eq : Operation(8, 3)
 
     companion object{
-        fun forOpCode(code : Int) : Program{
-            return Program::class.nestedClasses.flatMap {
-                if(it.isCompanion) emptyList<Program>()
-                else listOf(it.objectInstance as Program)
+        fun forOpCode(code : Int) : Operation{
+            return Operation::class.nestedClasses.flatMap {
+                if(it.isCompanion) emptyList<Operation>()
+                else listOf(it.objectInstance as Operation)
             }.first {
-                code == it.opCode
+                code == it.code
             }
         }
     }
 }
 
-class Instructions(private val program: Program, private val args : Array<Argument>){
-    fun execute(memory : IntArray, input : Int?) : Int? {
-        return when(program){
-            is Program.Add -> {
-                memory[args[2].value] = args[0].eval(memory) + args[1].eval(memory)
-                null
+fun IntArray.execute(input: PV) : PV? {
+    val pointer = input.pointer
+    val value = input.value
+    val opAndModes = getOperation(pointer)
+
+    return if(opAndModes.op == Operation.Term) return null
+    else {
+        val args = opAndModes.getArguments(this, pointer)
+        when(opAndModes.op){
+            is Operation.Add -> {
+                args[2].write(this, args[0].eval(this) + args[1].eval(this))
+                PV(pointer + opAndModes.op, Value.None)
             }
-            is Program.Mul -> {
-                memory[args[2].value] = args[0].eval(memory) * args[1].eval(memory)
-                null
+            is Operation.Mul -> {
+                args[2].write(this,args[0].eval(this) * args[1].eval(this))
+                PV(pointer + opAndModes.op, Value.None)
             }
-            is Program.Store -> {
-                memory[args[0].value] = input!!
-                null
+            is Operation.Store -> {
+                args[0].write(this, value.eval())
+                PV(pointer + opAndModes.op, Value.None)
             }
-            is Program.Out -> args[0].eval(memory)
-            is Program.Term -> null
+            is Operation.Out -> {
+                PV(pointer + opAndModes.op, Value.Something(args[0].eval(this)))
+            }
+            is Operation.JIT -> {
+                if(args[0].eval(this)  != 0) PV(Pointer(args[1].eval(this)), input.value)
+                else PV(pointer + opAndModes.op, Value.None)
+            }
+            is Operation.JIF -> {
+                if(args[0].eval(this) == 0) PV(Pointer(args[1].eval(this)), input.value)
+                else PV(pointer + opAndModes.op, Value.None)
+            }
+            is Operation.LessThan -> {
+                if(args[0].eval(this) < args[1].eval(this)){
+                    args[2].write(this, 1)
+                } else {
+                    args[2].write(this, 0)
+                }
+                PV(pointer + opAndModes.op, Value.None)
+            }
+            is Operation.Eq ->{
+                if(args[0].eval(this) == args[1].eval(this)) {
+                    args[2].write(this, 1)
+                }else {
+                    args[2].write(this, 0)
+                }
+                PV(pointer + opAndModes.op, Value.None)
+            }
+            is Operation.Term -> null
         }
     }
+
 }
+
