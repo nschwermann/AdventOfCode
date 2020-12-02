@@ -9,15 +9,15 @@ fun main() {
     println(part2(input))
 }
 
-data class Policy(val min : Int, val max : Int, val char: Char)
+private data class Policy(val min : Int, val max : Int, val char: Char)
 
-fun part1(list: List<Pair<Policy, String>>) : Int {
+private fun part1(list: List<Pair<Policy, String>>) : Int {
     return list.count {(policy, password) ->
-        password.count { policy.char == it }.let { it >= policy.min && it <= policy.max }
+        password.count { policy.char == it } in policy.min .. policy.max
     }
 }
 
-fun part2(list: List<Pair<Policy, String>>) : Int {
+private fun part2(list: List<Pair<Policy, String>>) : Int {
     return list.count { (policy, password) ->
         (password[policy.min - 1] == policy.char) xor (password[policy.max - 1] == policy.char)
     }

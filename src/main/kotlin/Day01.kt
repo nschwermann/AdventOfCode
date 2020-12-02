@@ -6,7 +6,7 @@ fun main() {
 }
 
 //Find the two ints who sum is 2020 and return their product
-fun part1(ints : List<Int>, sum : Int) : Int {
+private fun part1(ints : List<Int>, sum : Int) : Int {
     for(i in ints.indices){
         val value = ints[i]
         val want = sum - value
@@ -16,7 +16,7 @@ fun part1(ints : List<Int>, sum : Int) : Int {
 }
 
 //Find THREE ints who sum is 2020 and return their product.
-fun part2(ints : List<Int>, sum : Int) : Int {
+private fun part2(ints : List<Int>, sum : Int) : Int {
     for(i in ints.indices){
         val value = ints[i]
         val remains = sum - value
