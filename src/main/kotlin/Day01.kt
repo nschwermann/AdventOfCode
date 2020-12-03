@@ -1,4 +1,7 @@
-//https://adventofcode.com/2020/day/1
+/**
+ * https://adventofcode.com/2020/day/1
+ * --- Report Repair ---
+ */
 fun main() {
     val ints = ResourceReader(1).ints()
     println(part1(ints, 2020))

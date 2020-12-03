@@ -1,4 +1,7 @@
-//https://adventofcode.com/2020/day/2
+/**
+ * https://adventofcode.com/2020/day/2
+ * --- Password Philosophy ---
+ */
 fun main() {
     val input = ResourceReader(2).lines().map {
         it.split('-', ' ', ':').let {
