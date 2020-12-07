@@ -6,18 +6,16 @@ import java.util.*
  */
 
 fun main() {
-    val parentPattern = "(\\w+ \\w+) bags contain (.*)".toRegex()
+    val parentPattern = "(\\w+ \\w+) bags contain (.*)$".toRegex(RegexOption.MULTILINE)
     val containsPattern = "(\\d+) (\\w+ \\w+)".toRegex()
-    val input = ResourceReader(7).lines().map {
-        parentPattern.find(it)!!
-    }.map {
+    val input = ResourceReader(7).text().let { parentPattern.findAll(it)}.map {
         val (color, contains) = it.destructured
         val list = containsPattern.findAll(contains).map {
             val (num, color) = it.destructured
-            num.toInt() to Bag(color, emptyList())
+            num.toInt() to Bag(color)
         }.toList()
         Bag(color, list)
-    }
+    }.toList()
     println(part1(input))
     println(part2(input))
 }
