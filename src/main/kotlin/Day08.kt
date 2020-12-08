@@ -9,28 +9,25 @@ fun main() {
     println(part2(input))
 }
 
-private fun part1(program : List<BootCode>) : Int{
+private fun part1(program : List<Instruction>) : Int{
     return HandHeldVM().runWithHalt(program)
 }
 
-private fun part2(program: List<BootCode>) : Int{
+private fun part2(program: List<Instruction>) : Int{
     return HandHeldVM().runRepair(program)
 }
 
 class CodeParser {
-    private val pattern = "(\\w+) (\\+|-)(\\d+)$".toRegex(RegexOption.MULTILINE)
+    private val pattern = "(acc|jmp|nop) ([+-]\\d+)$".toRegex(RegexOption.MULTILINE)
 
-    fun parseCode(text : String) : List<BootCode>{
+    fun parseCode(text : String) : List<Instruction>{
         return pattern.findAll(text).map {
-            val (code, sign, value) = it.destructured
-            val arg = when(sign){
-                "-" -> -value.toInt()
-                else -> value.toInt()
-            }
+            val (code, arg) = it.destructured
+
             when(code){
-                "acc" -> Acc(arg)
-                "jmp" -> Jmp(arg)
-                else -> NoOp(arg)
+                "acc" -> Acc(arg.toInt())
+                "jmp" -> Jmp(arg.toInt())
+                else -> NoOp(arg.toInt())
             }
         }.toList()
     }
@@ -40,7 +37,7 @@ class HandHeldVM{
     private var index = 0
     private var _accumulator = 0
 
-    fun runWithHalt(program : List<BootCode>) : Int {
+    fun runWithHalt(program : List<Instruction>) : Int {
         val debugger = BooleanArray(program.size)
         while(!debugger[index]){
             debugger[index] = true
@@ -49,7 +46,7 @@ class HandHeldVM{
         return _accumulator
     }
 
-    fun runRepair(program: List<BootCode>) : Int {
+    fun runRepair(program: List<Instruction>) : Int {
         val debugger = BooleanArray(program.size)
         val indexSeq  = sequence {
             var last = program.size - 1
@@ -86,16 +83,16 @@ class HandHeldVM{
         }
     }
 
-    private fun runInstruction(bootCode: BootCode) = when(bootCode){
+    private fun runInstruction(instruction: Instruction) = when(instruction){
         is Acc -> {
-            _accumulator += bootCode.arg
+            _accumulator += instruction.arg
             index += 1
         }
         is NoOp -> index += 1
-        is Jmp -> index += bootCode.arg
+        is Jmp -> index += instruction.arg
     }
 }
-sealed class BootCode(open val arg : Int)
-data class Acc(override val arg: Int) : BootCode(arg)
-data class NoOp(override val arg : Int) : BootCode(arg)
-data class Jmp(override val arg : Int) : BootCode(arg)
+sealed class Instruction(open val arg : Int)
+data class Acc(override val arg: Int) : Instruction(arg)
+data class NoOp(override val arg : Int) : Instruction(arg)
+data class Jmp(override val arg : Int) : Instruction(arg)
