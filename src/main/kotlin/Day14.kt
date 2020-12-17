@@ -7,13 +7,6 @@ fun main() {
     val maskPattern = "mask = (\\w+)".toRegex()
     val writePattern = "mem\\[(\\d+)\\] = (\\d+)".toRegex()
 
-    val test = """
-        mask = XXXXXXXXXXXXXXXXXXXXXXXXXXXXX1XXXX0X
-        mem[8] = 11
-        mem[7] = 101
-        mem[8] = 0
-    """.trimIndent()
-    //ResourceReader(14).text()
     val input = ResourceReader(14).text().let {
         val instructions = mutableListOf<InstructionSet>()
         var curMask : String? = null
@@ -39,14 +32,11 @@ fun main() {
     println(part2(input))
 }
 
-//2346881602152
 private fun part1(input : List<InstructionSet>) : Long {
     val mem = input.fold(mutableMapOf<Long, Long>()){acc, next ->
-        val onMask = next.mask.replace('X', '0').toLong(2)
-        val offMask = next.mask.replace('X', '1').toLong(2)
         acc.apply {
             next.commands.forEach {
-                put(it.first, it.second or onMask and offMask)
+                put(it.first, it.second or next.mOn and next.mOff)
             }
         }
     }
@@ -54,12 +44,27 @@ private fun part1(input : List<InstructionSet>) : Long {
 }
 
 private fun part2(input : List<InstructionSet>) : Long{
-    val dupRemoved = input.fold(mutableListOf<InstructionSet>()){acc, next ->
-        if(!acc.contains(next)) acc+= next
-        acc
+    val mem = input.fold(mutableMapOf<Long, Long>()){acc, next ->
+        acc.apply {
+            val diff = next.mOff xor next.mOn
+
+            next.commands.forEach {(addr, value) ->
+                for(i in 0 until (1 shl diff.countOneBits())){
+                    var x =  addr or next.mOff
+                    var k = diff
+                    for(j in 0 until diff.countOneBits()){
+                        x = k xor k - (i shr j and 1) and diff xor x
+                        k = k and k - 1
+                    }
+                    acc[x] = value
+                }
+            }
+        }
     }
-    println("hasDuplicates: ${dupRemoved != input}")
-    return 1L
+    return mem.values.sum()
 }
 
-private data class InstructionSet(val mask : String, val commands : List<Pair<Long, Long>>)
+private class InstructionSet(mask : String, val commands : List<Pair<Long, Long>>){
+    val mOff = mask.replace('X', '1').toLong(2)
+    val mOn = mask.replace('X', '0').toLong(2)
+}
