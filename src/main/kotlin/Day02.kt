@@ -2,7 +2,7 @@
  * https://adventofcode.com/2020/day/2
  * --- Password Philosophy ---
  */
-fun main() {
+private fun main() {
     val input = ResourceReader(2).lines().map {
         it.split('-', ' ', ':').let {
             Policy(it[0].toInt(), it[1].toInt(), it[2].first()) to it[4]

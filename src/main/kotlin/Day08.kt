@@ -2,7 +2,7 @@
  * https://adventofcode.com/2020/day/8
  * --- Handheld Halting ---
  */
-fun main() {
+private fun main() {
 
     val input = ResourceReader(8).text().let { CodeParser().parseCode(it) }
     println(part1(input))

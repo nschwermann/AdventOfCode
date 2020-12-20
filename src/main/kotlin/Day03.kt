@@ -4,7 +4,7 @@ import java.math.BigInteger
  * https://adventofcode.com/2020/day/3
  * --- Toboggan Trajectory ---
  */
-fun main() {
+private fun main() {
     val input = ResourceReader(3).lines().map {
         it.toCharArray()
     }.let { TobogganMap(it.size, it) }

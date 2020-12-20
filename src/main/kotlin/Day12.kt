@@ -6,7 +6,7 @@ import kotlin.math.sin
  * --- Rain Risk ---
  * https://adventofcode.com/2020/day/12
  */
-fun main() {
+private fun main() {
     val pattern = "([NSEWLRF])(\\d+)$".toRegex(RegexOption.MULTILINE)
     val input = ResourceReader(12).text().let {
         pattern.findAll(it)

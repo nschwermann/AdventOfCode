@@ -4,7 +4,7 @@ import kotlin.math.pow
  * --- Adapter Array ---
  * https://adventofcode.com/2020/day/10
  */
-fun main() {
+private fun main() {
     val input = ResourceReader(10).ints()
     println(part1(input))
     println(part2(input))

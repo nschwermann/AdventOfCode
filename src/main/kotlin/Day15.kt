@@ -2,7 +2,7 @@
  * --- Rambunctious Recitation ---
  * https://adventofcode.com/2020/day/15
  */
-fun main() {
+private fun main() {
     val input = listOf(2,1,10,11,0,6)
     println(solver(input, 2020L))
     println(solver(input, 30_000_000))

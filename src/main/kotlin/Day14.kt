@@ -3,7 +3,7 @@
  * https://adventofcode.com/2020/day/14
  */
 
-fun main() {
+private fun main() {
     val maskPattern = "mask = (\\w+)".toRegex()
     val writePattern = "mem\\[(\\d+)\\] = (\\d+)".toRegex()
 

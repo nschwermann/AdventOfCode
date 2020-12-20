@@ -2,7 +2,7 @@
  * https://adventofcode.com/2020/day/6
  * --- Custom Customs ---
  */
-fun main() {
+private fun main() {
     val input = ResourceReader(6).text().split("\n\n")
     println(part1(input))
     println(part2(input))

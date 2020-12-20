@@ -2,7 +2,7 @@
  * https://adventofcode.com/2020/day/1
  * --- Report Repair ---
  */
-fun main() {
+private fun main() {
     val ints = ResourceReader(1).ints()
     println(part1(ints, 2020))
     println(part2(ints, 2020))

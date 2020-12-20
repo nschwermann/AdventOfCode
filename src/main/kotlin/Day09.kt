@@ -2,7 +2,7 @@
  * --- Encoding Error ---
  * https://adventofcode.com/2020/day/9
  */
-fun main() {
+private fun main() {
     val input = ResourceReader(9).lines().map { it.toLong() }.toLongArray()
     println(part1(input))
     println(part2(input))

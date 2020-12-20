@@ -3,7 +3,7 @@
  * --- Passport Processing ---
  **/
 
-fun main() {
+private fun main() {
     val input = ResourceReader(4).text().split("\\n\\n".toRegex())
     println(part1(input))
     println(part2(input))

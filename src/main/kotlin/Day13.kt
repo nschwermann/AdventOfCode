@@ -2,7 +2,7 @@
  * --- Shuttle Search ---
  * https://adventofcode.com/2020/day/13
  */
-fun main() {
+private fun main() {
 
     val input = ResourceReader(13).lines()
 

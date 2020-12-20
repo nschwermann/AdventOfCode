@@ -2,7 +2,7 @@
  * --- Seating System ---
  * https://adventofcode.com/2020/day/11
  */
-fun main() {
+private fun main() {
 
     val input = ResourceReader(11).text().lines().let { lines ->
         Array(lines.size){ index ->

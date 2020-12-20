@@ -5,7 +5,7 @@ import java.util.*
  * --- Handy Haversacks ---
  */
 
-fun main() {
+private fun main() {
     val parentPattern = "(\\w+ \\w+) bags contain (.*)$".toRegex(RegexOption.MULTILINE)
     val containsPattern = "(\\d+) (\\w+ \\w+)".toRegex()
     val input = ResourceReader(7).text().let { parentPattern.findAll(it)}.map {

@@ -5,7 +5,7 @@ import kotlin.math.floor
  * https://adventofcode.com/2020/day/5
  * --- Binary Boarding ---
  */
-fun main() {
+private fun main() {
     val input = ResourceReader(5).lines().map { it.findRowAndColumn().seatId }
     println(part1(input))
     println(part2(input))
